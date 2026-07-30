@@ -362,6 +362,29 @@ describe("compose: writeInfraCompose", () => {
     expect(parsed.networks.devtun.name).toBe("devtun");
   });
 
+  it("refuses to route compose one-off containers", () => {
+    // Regression guard: `docker compose run` copies the service's traefik
+    // labels, so without this constraint a throwaway container silently joins
+    // the public router and takes real traffic.
+    writeInfraCompose(inst("devtun"), baseConfig);
+    const parsed = parseYaml(
+      readFileSync(join(dir.path, "docker-compose.yml"), "utf-8")
+    );
+    expect(parsed.services.traefik.command).toContain(
+      "--providers.docker.constraints=!Label(`com.docker.compose.oneoff`,`True`)"
+    );
+  });
+
+  it("applies the one-off routing guard to named instances too", () => {
+    writeInfraCompose(inst("alt"), baseConfig);
+    const parsed = parseYaml(
+      readFileSync(join(dir.path, "docker-compose.yml"), "utf-8")
+    );
+    expect(parsed.services.traefik.command).toContain(
+      "--providers.docker.constraints=!Label(`com.docker.compose.oneoff`,`True`)"
+    );
+  });
+
   it("parameterizes container names, network, and socket for a named instance", () => {
     writeInfraCompose(inst("alt"), {
       ...baseConfig,

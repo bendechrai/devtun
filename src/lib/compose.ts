@@ -20,6 +20,16 @@ export function writeInfraCompose(
     '"--providers.docker.exposedbydefault=false"',
     `"--providers.docker.network=${net}"`,
     '"--entrypoints.web.address=:80"',
+    // Never route one-off containers. `docker compose run` COPIES the service's
+    // labels, so a throwaway container derived from a routed service - a test
+    // instance, a debug run - inherits the public hostname's traefik labels,
+    // joins the router, and Traefik load-balances real public traffic into it.
+    // Compose stamps com.docker.compose.oneoff itself (True for `run`, False
+    // for real service containers), so unlike a traefik.enable=false flag the
+    // user must remember to pass, this cannot be inherited away or forgotten.
+    // Containers with no compose labels (e.g. plain `docker run`) are
+    // unaffected: Label() is false for them, so the negation matches.
+    '"--providers.docker.constraints=!Label(`com.docker.compose.oneoff`,`True`)"',
   ];
 
   const ports: string[] = [];
