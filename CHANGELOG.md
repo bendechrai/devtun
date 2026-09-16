@@ -1,44 +1,44 @@
-# [1.4.0](https://github.com/bendechrai/devtunnel/compare/v1.3.0...v1.4.0) (2026-07-29)
+# [1.4.0](https://github.com/bendechrai/devtun/compare/v1.3.0...v1.4.0) (2026-07-29)
 
 
 ### Bug Fixes
 
-* exclude --fqdn hostnames from doctor orphan detection ([2383e7d](https://github.com/bendechrai/devtunnel/commit/2383e7d76f3d6f5cae6a62fa07c1f9349403fda7))
+* exclude --fqdn hostnames from doctor orphan detection ([2383e7d](https://github.com/bendechrai/devtun/commit/2383e7d76f3d6f5cae6a62fa07c1f9349403fda7))
 
 
 ### Features
 
-* register hostnames outside the dev wildcard via devtun add --fqdn ([ac41dd3](https://github.com/bendechrai/devtunnel/commit/ac41dd3e64838547575fd70d1e19fe538bcb9e5d))
-* support multiple independent instances (per-daemon, per-FQDN) ([82b7603](https://github.com/bendechrai/devtunnel/commit/82b76037b856048f0ffdc72bdfcdfa2ffc567876))
+* register hostnames outside the dev wildcard via devtun add --fqdn ([ac41dd3](https://github.com/bendechrai/devtun/commit/ac41dd3e64838547575fd70d1e19fe538bcb9e5d))
+* support multiple independent instances (per-daemon, per-FQDN) ([82b7603](https://github.com/bendechrai/devtun/commit/82b76037b856048f0ffdc72bdfcdfa2ffc567876))
 
-# [1.3.0](https://github.com/bendechrai/devtunnel/compare/v1.2.0...v1.3.0) (2026-06-29)
-
-
-### Features
-
-* add --cache mode flag to devtun add for browser/CDN cache control ([12d2685](https://github.com/bendechrai/devtunnel/commit/12d2685560a587c1bbc9ca4bc21d704977e8f847))
-
-# [1.2.0](https://github.com/bendechrai/devtunnel/compare/v1.1.0...v1.2.0) (2026-05-30)
+# [1.3.0](https://github.com/bendechrai/devtun/compare/v1.2.0...v1.3.0) (2026-06-29)
 
 
 ### Features
 
-* --json output mode on list, status, doctor, and config ([0cc104a](https://github.com/bendechrai/devtunnel/commit/0cc104a8aadddbda80536630e2492980e756829c))
-* non-interactive flags for add and remove with TTY detection ([fe10f8c](https://github.com/bendechrai/devtunnel/commit/fe10f8c5fdfe7c7e1940779a802ff1ac829edb7a))
-* per-command --help and non-interactive setup via flags and env ([df63c39](https://github.com/bendechrai/devtunnel/commit/df63c39c91d57af7623e844761ee127a6951e450))
+* add --cache mode flag to devtun add for browser/CDN cache control ([12d2685](https://github.com/bendechrai/devtun/commit/12d2685560a587c1bbc9ca4bc21d704977e8f847))
 
-# [1.1.0](https://github.com/bendechrai/devtunnel/compare/v1.0.1...v1.1.0) (2026-05-30)
+# [1.2.0](https://github.com/bendechrai/devtun/compare/v1.1.0...v1.2.0) (2026-05-30)
+
+
+### Features
+
+* --json output mode on list, status, doctor, and config ([0cc104a](https://github.com/bendechrai/devtun/commit/0cc104a8aadddbda80536630e2492980e756829c))
+* non-interactive flags for add and remove with TTY detection ([fe10f8c](https://github.com/bendechrai/devtun/commit/fe10f8c5fdfe7c7e1940779a802ff1ac829edb7a))
+* per-command --help and non-interactive setup via flags and env ([df63c39](https://github.com/bendechrai/devtun/commit/df63c39c91d57af7623e844761ee127a6951e450))
+
+# [1.1.0](https://github.com/bendechrai/devtun/compare/v1.0.1...v1.1.0) (2026-05-30)
 
 
 ### Bug Fixes
 
-* clean up traefik.enable and default network on devtun remove ([fcaf5e6](https://github.com/bendechrai/devtunnel/commit/fcaf5e6ab7859dad69f843f09583c87d338d49e3))
+* clean up traefik.enable and default network on devtun remove ([fcaf5e6](https://github.com/bendechrai/devtun/commit/fcaf5e6ab7859dad69f843f09583c87d338d49e3))
 
 
 ### Features
 
-* add doctor command for diagnosing config and Cloudflare drift ([ff6bac7](https://github.com/bendechrai/devtunnel/commit/ff6bac731c8bf21ca28e83030d87a75a211c7dc7))
-* validate domain/subdomain changes and clear stale derived state ([9f49ee5](https://github.com/bendechrai/devtunnel/commit/9f49ee5fab4868ca060d7dce89e152479c9538d9))
+* add doctor command for diagnosing config and Cloudflare drift ([ff6bac7](https://github.com/bendechrai/devtun/commit/ff6bac731c8bf21ca28e83030d87a75a211c7dc7))
+* validate domain/subdomain changes and clear stale derived state ([9f49ee5](https://github.com/bendechrai/devtun/commit/9f49ee5fab4868ca060d7dce89e152479c9538d9))
 
 # Changelog
 
@@ -87,13 +87,13 @@ Versions are published automatically by [semantic-release](https://github.com/se
 
 ### Fixed
 
-- Explicitly include `README.md` in the published npm package's `files` list. ([7caf069](https://github.com/bendechrai/devtunnel/commit/7caf069182cd5bec56ddf14f0336ccc500bea4ac))
+- Explicitly include `README.md` in the published npm package's `files` list. ([7caf069](https://github.com/bendechrai/devtun/commit/7caf069182cd5bec56ddf14f0336ccc500bea4ac))
 
 ## [1.0.0] - 2026-05-07
 
 ### Changed
 
-- **BREAKING:** `devtun add <name>` now requires the service name and port as explicit arguments: `devtun add <name> <service> <port>`. This removes the implicit "first service in compose, port 3000" heuristic in favour of a config that's unambiguous when projects have multiple services. ([6cfaab5](https://github.com/bendechrai/devtunnel/commit/6cfaab55c4e02208d7712e17590e2bc0f87439ab))
+- **BREAKING:** `devtun add <name>` now requires the service name and port as explicit arguments: `devtun add <name> <service> <port>`. This removes the implicit "first service in compose, port 3000" heuristic in favour of a config that's unambiguous when projects have multiple services. ([6cfaab5](https://github.com/bendechrai/devtun/commit/6cfaab55c4e02208d7712e17590e2bc0f87439ab))
 
 ### Migration
 
@@ -103,13 +103,13 @@ Versions are published automatically by [semantic-release](https://github.com/se
 
 ### Fixed
 
-- Upgrade the Traefik image to v3 for compatibility with current Docker API responses. v2 was failing to discover containers on newer Docker Engine releases. ([64367a1](https://github.com/bendechrai/devtunnel/commit/64367a111c1ca3286dd131933853f384f870c741))
+- Upgrade the Traefik image to v3 for compatibility with current Docker API responses. v2 was failing to discover containers on newer Docker Engine releases. ([64367a1](https://github.com/bendechrai/devtun/commit/64367a111c1ca3286dd131933853f384f870c741))
 
 ## [0.2.0] - 2026-04-01
 
 ### Added
 
-- Traefik middleware injects `CDN-Cache-Control: no-store` on every routed response, preventing Cloudflare's edge from caching local dev responses. ([94a9b0f](https://github.com/bendechrai/devtunnel/commit/94a9b0f0f2371a6c33838802d334d18a5c543d46))
+- Traefik middleware injects `CDN-Cache-Control: no-store` on every routed response, preventing Cloudflare's edge from caching local dev responses. ([94a9b0f](https://github.com/bendechrai/devtun/commit/94a9b0f0f2371a6c33838802d334d18a5c543d46))
 
 ## [0.1.0] - 2026-03-08
 
@@ -123,9 +123,9 @@ Versions are published automatically by [semantic-release](https://github.com/se
 - macOS LaunchAgent and Linux systemd user unit support via `devtun autostart enable`.
 - Semantic-release pipeline publishing to npm with provenance attestations on push to `main`.
 
-[Unreleased]: https://github.com/bendechrai/devtunnel/compare/v1.0.1...HEAD
-[1.0.1]: https://github.com/bendechrai/devtunnel/compare/v1.0.0...v1.0.1
-[1.0.0]: https://github.com/bendechrai/devtunnel/compare/v0.2.1...v1.0.0
-[0.2.1]: https://github.com/bendechrai/devtunnel/compare/v0.2.0...v0.2.1
-[0.2.0]: https://github.com/bendechrai/devtunnel/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/bendechrai/devtunnel/releases/tag/v0.1.0
+[Unreleased]: https://github.com/bendechrai/devtun/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/bendechrai/devtun/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/bendechrai/devtun/compare/v0.2.1...v1.0.0
+[0.2.1]: https://github.com/bendechrai/devtun/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/bendechrai/devtun/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/bendechrai/devtun/releases/tag/v0.1.0
