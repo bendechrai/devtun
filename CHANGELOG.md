@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/bendechrai/devtun/compare/v1.4.0...v1.4.1) (2026-09-16)
+
+
+### Bug Fixes
+
+* bump yaml to 2.9.1 for nested-collection stack overflow advisory ([7ba0723](https://github.com/bendechrai/devtun/commit/7ba07239b58402c6780efd53f1a87ec305af4021))
+
 # [1.4.0](https://github.com/bendechrai/devtun/compare/v1.3.0...v1.4.0) (2026-07-29)
 
 
