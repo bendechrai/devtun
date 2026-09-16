@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>devtun: public HTTPS URLs for local Docker containers</title>
+<meta name="description" content="Run projects on your laptop and open them from any device at https://<project>.dev.yourdomain.com. Traefik, Cloudflare Tunnel and Cloudflare for SaaS, automated.">
+<link rel="canonical" href="https://bendechrai.github.io/devtun/">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="devtun">
+<meta property="og:title" content="devtun: public HTTPS URLs for local Docker containers">
+<meta property="og:description" content="Every local container gets a real HTTPS address. Traefik, Cloudflare Tunnel and Cloudflare for SaaS, automated.">
+<meta property="og:url" content="https://bendechrai.github.io/devtun/">
+<meta property="og:image" content="https://bendechrai.github.io/devtun/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="devtun: every local container gets a real HTTPS address. Request path from browser, through the Cloudflare edge and tunnel, to Traefik and your container.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@bendechrai">
+<meta name="twitter:creator" content="@bendechrai">
+<meta name="twitter:title" content="devtun: public HTTPS URLs for local Docker containers">
+<meta name="twitter:description" content="Every local container gets a real HTTPS address. Traefik, Cloudflare Tunnel and Cloudflare for SaaS, automated.">
+<meta name="twitter:image" content="https://bendechrai.github.io/devtun/og.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F4F5F1;
+    --ink: #15191D;
+    --ink-2: #4B5560;
+    --line: #D7DBD3;
+    --cobalt: #2C4BFF;
+    --cobalt-soft: #E4E9FF;
+    --edge: #FF8A2A;
+    --term-bg: #1A1F25;
+    --term-fg: #E7EAE3;
+    --term-dim: #8A939E;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #101317;
+      --ink: #EEF0EA;
+      --ink-2: #A3ACB5;
+      --line: #2A3138;
+      --cobalt: #6F86FF;
+      --cobalt-soft: #1B2247;
+      --edge: #FF9A47;
+      --term-bg: #05070A;
+      --term-fg: #E7EAE3;
+      --term-dim: #7B8592;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  code, pre, .mono {
+    font-family: "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--cobalt); outline-offset: 3px; }
+  img { max-width: 100%; }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 28px; }
+
+  /* nav */
+  nav.top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 28px 0;
+  }
+  .brand {
+    display: inline-flex; align-items: baseline; gap: 10px;
+    font-weight: 700; font-size: 22px; letter-spacing: -0.01em; text-decoration: none;
+  }
+  .brand .v { font-size: 13px; color: var(--ink-2); font-weight: 500; }
+  nav.top ul { list-style: none; display: flex; gap: 28px; margin: 0; padding: 0; font-size: 16px; }
+  nav.top a.btn {
+    padding: 8px 14px; border: 1.5px solid var(--ink); border-radius: 999px; text-decoration: none;
+  }
+
+  /* hero */
+  .hero { padding: 56px 0 24px; }
+  h1 {
+    font-size: clamp(44px, 7vw, 92px);
+    font-weight: 700;
+    line-height: 0.98;
+    letter-spacing: -0.035em;
+    margin: 0 0 28px;
+    max-width: 14ch;
+    font-variation-settings: "opsz" 96;
+  }
+  .lede {
+    font-size: clamp(19px, 2.1vw, 24px); color: var(--ink-2); max-width: 44ch; margin: 0 0 40px;
+    font-weight: 400;
+  }
+  .install {
+    display: inline-flex; align-items: center; gap: 14px;
+    background: var(--term-bg); color: var(--term-fg);
+    padding: 14px 18px; border-radius: 10px; font-size: 17px;
+  }
+  .install .dim { color: var(--term-dim); }
+  .install button {
+    background: transparent; border: 1px solid var(--term-dim); color: var(--term-fg);
+    border-radius: 6px; padding: 5px 10px; font: inherit; font-size: 13px; cursor: pointer;
+  }
+  .install button:hover { border-color: var(--term-fg); }
+
+  /* route diagram */
+  .route { margin: 56px 0 0; }
+  .route-frame {
+    border: 1.5px solid var(--line); border-radius: 18px; padding: 24px 20px 8px;
+    overflow-x: auto;
+    background: linear-gradient(180deg, transparent, var(--cobalt-soft) 140%);
+  }
+  .route svg { display: block; width: 100%; min-width: 760px; height: auto; }
+  .route text { font-family: "Bricolage Grotesque", Arial, sans-serif; fill: var(--ink); }
+  .route .lbl { font-size: 17px; font-weight: 600; }
+  .route .sub { font-size: 13px; fill: var(--ink-2); }
+  .route .mono { font-size: 13px; fill: var(--ink-2); }
+  .route .rail { stroke: var(--line); stroke-width: 2; fill: none; }
+  .route .flow { stroke: var(--cobalt); stroke-width: 2.5; fill: none; stroke-dasharray: 6 10; }
+  .route .node { fill: var(--paper); stroke: var(--ink); stroke-width: 1.5; }
+  .route .node.edge { stroke: var(--edge); }
+  .route .packet { fill: var(--cobalt); }
+  .route .tls { fill: var(--edge); }
+  .route-caption { font-size: 15px; color: var(--ink-2); margin: 16px 4px 8px; max-width: 70ch; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .route .flow { animation: dash 2.4s linear infinite; }
+    @keyframes dash { to { stroke-dashoffset: -32; } }
+    .route .packet { offset-path: path("M 110 96 C 220 96 260 96 330 96 S 440 96 560 96 S 700 96 790 96 S 930 96 1010 96"); animation: travel 4.2s cubic-bezier(.4,0,.2,1) infinite; }
+    @keyframes travel {
+      0% { offset-distance: 0%; opacity: 0; }
+      6% { opacity: 1; }
+      88% { opacity: 1; }
+      100% { offset-distance: 100%; opacity: 0; }
+    }
+  }
+
+  /* sections */
+  section { padding: 88px 0 0; }
+  h2 {
+    font-size: clamp(30px, 4vw, 44px); font-weight: 700; letter-spacing: -0.03em;
+    line-height: 1.05; margin: 0 0 20px; max-width: 20ch;
+  }
+  .two { display: grid; grid-template-columns: 1.1fr 1fr; gap: 56px; align-items: start; }
+  @media (max-width: 860px) { .two { grid-template-columns: 1fr; gap: 32px; } }
+  p { margin: 0 0 18px; max-width: 60ch; }
+  p.muted { color: var(--ink-2); }
+
+  pre.term {
+    background: var(--term-bg); color: var(--term-fg);
+    border-radius: 14px; padding: 22px 24px; margin: 0;
+    font-size: 15.5px; line-height: 1.65; overflow-x: auto;
+  }
+  pre.term .c { color: var(--term-dim); }
+  pre.term .u { color: var(--cobalt); }
+  pre.term .ok { color: #7BD88F; }
+  pre.term .b { font-weight: 500; color: #fff; }
+
+  ol.steps { list-style: none; counter-reset: s; margin: 0; padding: 0; border-top: 1.5px solid var(--line); }
+  ol.steps li {
+    counter-increment: s; display: grid; grid-template-columns: 40px 1fr; gap: 12px;
+    padding: 14px 0; border-bottom: 1.5px solid var(--line); font-size: 17px;
+  }
+  ol.steps li::before { content: counter(s); color: var(--cobalt); font-weight: 700; font-variant-numeric: tabular-nums; }
+  ol.steps li span { color: var(--ink-2); display: block; font-size: 15px; }
+
+  .cert {
+    border-left: 4px solid var(--edge); padding: 6px 0 6px 22px; margin: 28px 0 0;
+    max-width: 60ch;
+  }
+  .cert strong { font-weight: 700; }
+
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px 32px; margin-top: 8px; }
+  @media (max-width: 860px) { .grid3 { grid-template-columns: 1fr; gap: 28px; } }
+  .grid3 h3 { font-size: 21px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 8px; }
+  .grid3 p { font-size: 16.5px; color: var(--ink-2); margin: 0; }
+
+  footer {
+    margin-top: 110px; padding: 36px 0 48px; border-top: 1.5px solid var(--line);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; font-size: 15px; color: var(--ink-2);
+  }
+  footer a { color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="top" aria-label="Main">
+    <a class="brand" href="#"><span>devtun</span><span class="v" id="version">v1.4.0</span></a>
+    <ul>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#setup">Setup</a></li>
+      <li><a class="btn" href="https://github.com/bendechrai/devtun">GitHub</a></li>
+    </ul>
+  </nav>
+
+  <header class="hero">
+    <h1>Every local container gets a real HTTPS address.</h1>
+    <p class="lede">Run projects on your laptop. Open them from any device at <code>https://&lt;project&gt;.dev.yourdomain.com</code>, with a trusted certificate and nothing to install on the client.</p>
+    <div class="install">
+      <span class="mono"><span class="dim">$</span> npm install -g devtun</span>
+      <button type="button" data-copy="npm install -g devtun">Copy</button>
+    </div>
+
+    <div class="route" aria-label="Request path from browser to container">
+      <div class="route-frame">
+        <svg viewBox="0 0 1100 200" role="img" aria-labelledby="routeTitle">
+          <title id="routeTitle">A request travels from the browser to the Cloudflare edge, through a tunnel, to Traefik, then to your container.</title>
+
+          <!-- rail -->
+          <path class="rail" d="M 110 96 H 1010"/>
+          <path class="flow" d="M 110 96 H 1010"/>
+
+          <!-- nodes -->
+          <g transform="translate(60,96)">
+            <rect class="node" x="-50" y="-30" width="100" height="60" rx="12"/>
+            <text class="lbl" x="0" y="-2" text-anchor="middle">Browser</text>
+            <text class="sub" x="0" y="17" text-anchor="middle">anywhere</text>
+          </g>
+
+          <g transform="translate(330,96)">
+            <rect class="node edge" x="-80" y="-30" width="160" height="60" rx="12"/>
+            <text class="lbl" x="0" y="-2" text-anchor="middle">Cloudflare edge</text>
+            <text class="sub" x="0" y="17" text-anchor="middle">TLS ends here</text>
+            <circle class="tls" cx="66" cy="-30" r="6"/>
+          </g>
+
+          <g transform="translate(560,96)">
+            <rect class="node" x="-70" y="-30" width="140" height="60" rx="12"/>
+            <text class="lbl" x="0" y="-2" text-anchor="middle">cloudflared</text>
+            <text class="sub" x="0" y="17" text-anchor="middle">QUIC tunnel</text>
+          </g>
+
+          <g transform="translate(790,96)">
+            <rect class="node" x="-60" y="-30" width="120" height="60" rx="12"/>
+            <text class="lbl" x="0" y="-2" text-anchor="middle">Traefik</text>
+            <text class="sub" x="0" y="17" text-anchor="middle">routes by Host()</text>
+          </g>
+
+          <g transform="translate(1010,96)">
+            <rect class="node" x="-60" y="-30" width="120" height="60" rx="12"/>
+            <text class="lbl" x="0" y="-2" text-anchor="middle">myapp:3000</text>
+            <text class="sub" x="0" y="17" text-anchor="middle">your container</text>
+          </g>
+
+          <!-- travelling packet -->
+          <circle class="packet" r="7"/>
+
+          <!-- protocol annotations -->
+          <text class="mono" x="170" y="150" text-anchor="middle">https</text>
+          <text class="mono" x="445" y="150" text-anchor="middle">tunnel</text>
+          <text class="mono" x="675" y="150" text-anchor="middle">http</text>
+          <text class="mono" x="900" y="150" text-anchor="middle">http</text>
+
+          <!-- laptop boundary -->
+          <path class="rail" d="M 470 40 V 30 H 1090 V 40" stroke-dasharray="4 6"/>
+          <text class="sub" x="780" y="22" text-anchor="middle">your machine, Docker</text>
+        </svg>
+      </div>
+      <p class="route-caption">Cloudflare terminates TLS at the edge. The tunnel carries plain HTTP to Traefik, which matches the hostname to a container label. No local certificates, no port forwarding, no inbound firewall rules.</p>
+    </div>
+  </header>
+
+  <section id="how">
+    <div class="two">
+      <div>
+        <h2>Add a project, get a URL.</h2>
+        <p>From inside a project that already has a Docker Compose file, tell devtun the project name, the service to expose, and the port it listens on. devtun creates the DNS record, requests an edge certificate, and adds the Traefik labels.</p>
+        <p class="muted">Share the link with a teammate, point a webhook at it, or open it on your phone. It stays up as long as the container does.</p>
+      </div>
+      <pre class="term"><span class="c"># in ~/code/myapp</span>
+$ devtun add myapp web 3000
+
+<span class="b">Adding myapp.dev.example.com</span>
+
+<span class="b">Step 1:</span> Cloudflare DNS...
+  Creating DNS: myapp.dev.example.com -&gt; tunnel-origin.example.com
+  Registering custom hostname with SSL...
+  <span class="ok">Registered (SSL: pending_validation)</span>
+
+<span class="b">Step 2:</span> Docker Compose override...
+  <span class="ok">Updated docker-compose.override.yml (web:3000, cache=all)</span>
+
+Restart containers to apply changes? (docker compose up -d) [y/N] y
+
+  <span class="ok">https://myapp.dev.example.com/ will be live once SSL activates.</span>
+  Check status with: devtun status myapp</pre>
+    </div>
+  </section>
+
+  <section id="setup">
+    <div class="two">
+      <div>
+        <h2>One setup, then forget about it.</h2>
+        <p><code>devtun setup</code> walks through the configuration and does each step in order. If it gets interrupted, run it again: every step checks whether it has already been done.</p>
+        <p class="muted">The only manual step is switching on Cloudflare for SaaS in the dashboard the first time. Setup detects when that is needed and gives you the link.</p>
+        <div class="cert">
+          <strong>Why Cloudflare for SaaS?</strong> Universal SSL covers <code>*.example.com</code> but wildcards only reach one level, so <code>*.dev.example.com</code> is out. Cloudflare for SaaS issues a separate edge certificate per hostname, free for up to 100. devtun handles the whole exchange.
+        </div>
+      </div>
+      <ol class="steps">
+        <li>Create the config <span>~/.devtun/config.json</span></li>
+        <li>Check Docker is running</li>
+        <li>Look up your Cloudflare zone</li>
+        <li>Create or reuse a Cloudflare Tunnel</li>
+        <li>Configure SSL mode and Universal SSL</li>
+        <li>Enable Cloudflare for SaaS and the fallback origin</li>
+        <li>Start Traefik and the tunnel <span>generated Docker Compose file</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section>
+    <h2>Built from things you already run.</h2>
+    <div class="grid3">
+      <div>
+        <h3>Traefik</h3>
+        <p>Discovers containers through Docker labels and routes each hostname to the right service. Nothing to restart when you add a project.</p>
+      </div>
+      <div>
+        <h3>Cloudflare Tunnel</h3>
+        <p>Outbound-only connection from your machine to Cloudflare's edge. Works behind NAT, on hotel wifi, on a laptop that moves between networks.</p>
+      </div>
+      <div>
+        <h3>Your API token</h3>
+        <p>Scoped to one zone with DNS, SSL and zone-settings edit access. Supply it as an environment variable, a 1Password CLI reference, or in the config.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>devtun is MIT licensed. Needs Node.js 18+ and Docker.</span>
+    <span><a href="https://www.npmjs.com/package/devtun">npm</a> &nbsp;&nbsp; <a href="https://github.com/bendechrai/devtun">GitHub</a> &nbsp;&nbsp; <a href="https://github.com/bendechrai/devtun#readme">README</a></span>
+  </footer>
+
+</div>
+<script>
+  document.querySelectorAll('[data-copy]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      try {
+        navigator.clipboard.writeText(b.dataset.copy).then(function () {
+          b.textContent = 'Copied';
+          setTimeout(function () { b.textContent = 'Copy'; }, 1600);
+        });
+      } catch (e) {}
+    });
+  });
+
+  // Show the currently published version rather than a hardcoded one.
+  fetch('https://registry.npmjs.org/devtun/latest')
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (pkg) {
+      if (pkg && typeof pkg.version === 'string') {
+        document.getElementById('version').textContent = 'v' + pkg.version;
+      }
+    })
+    .catch(function () {});
+</script>
+</body>
+</html>
