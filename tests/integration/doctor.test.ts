@@ -5,6 +5,7 @@ import { makeIsolatedHome, type IsolatedHome } from "../helpers/config-dir.js";
 vi.mock("../../src/lib/docker.js", () => ({
   isDockerRunning: vi.fn().mockReturnValue(true),
   isStackRunning: vi.fn().mockReturnValue(true),
+  tunnelCloudflaredVersion: vi.fn().mockReturnValue("2026.10.4"),
   restartProject: vi.fn(),
   composeUp: vi.fn(),
   composeDown: vi.fn(),
@@ -84,7 +85,7 @@ describe("doctor command (integration)", () => {
     expect(output).toContain("[OK] docker socket");
     expect(output).toContain("[OK] docker");
     expect(output).toContain("[OK] devtun stack");
-    expect(output).toMatch(/10 ok, 0 warning/);
+    expect(output).toMatch(/11 ok, 0 warning/);
   });
 
   it("warns when stored zoneId is stale", async () => {
@@ -261,6 +262,71 @@ describe("doctor command (integration)", () => {
     await doctor();
 
     expect(all()).toContain("[WARN] devtun stack");
+    expect(all()).not.toContain("cloudflared version");
+  });
+
+  function seedHealthyInstance() {
+    const zone = addZone(mock.state, "example.com");
+    zone.fallbackOrigin = { origin: "tunnel-origin.example.com", status: "active" };
+    const account = mock.state.accounts.get(zone.accountId);
+    if (!account) throw new Error("account not seeded");
+    account.tunnels.set("tunnel-1", {
+      id: "tunnel-1",
+      name: "dev-example-com",
+      status: "healthy",
+      created_at: new Date().toISOString(),
+    });
+    home.writeConfig({
+      domain: "example.com",
+      devSubdomain: "dev.example.com",
+      tunnelName: "dev-example-com",
+      dockerSocket: home.homeDir,
+      zoneId: zone.id,
+      accountId: zone.accountId,
+      tunnelId: "tunnel-1",
+    });
+  }
+
+  it("reports the running cloudflared version when it is current", async () => {
+    seedHealthyInstance();
+    const docker = await import("../../src/lib/docker.js");
+    vi.mocked(docker.isStackRunning).mockReturnValue(true);
+    vi.mocked(docker.tunnelCloudflaredVersion).mockReturnValue("2026.10.4");
+
+    const { doctor } = await import("../../src/commands/doctor.js");
+    await doctor();
+
+    expect(all()).toContain("[OK] cloudflared version");
+    expect(all()).toContain("2026.10.4");
+    expect(vi.mocked(docker.tunnelCloudflaredVersion)).toHaveBeenCalledWith("devtun-tunnel", home.homeDir);
+  });
+
+  it("fails when cloudflared predates the eMudhra certificate fix", async () => {
+    seedHealthyInstance();
+    const docker = await import("../../src/lib/docker.js");
+    vi.mocked(docker.isStackRunning).mockReturnValue(true);
+    vi.mocked(docker.tunnelCloudflaredVersion).mockReturnValue("2026.7.1");
+
+    const { doctor } = await import("../../src/commands/doctor.js");
+    await expect(doctor()).rejects.toThrow(/__exit_1__/);
+
+    const output = all();
+    expect(output).toContain("[FAIL] cloudflared version");
+    expect(output).toContain("2026.7.1");
+    expect(output).toContain("2026.10.2");
+    expect(output).toContain("devtun up");
+  });
+
+  it("warns when the cloudflared version cannot be read", async () => {
+    seedHealthyInstance();
+    const docker = await import("../../src/lib/docker.js");
+    vi.mocked(docker.isStackRunning).mockReturnValue(true);
+    vi.mocked(docker.tunnelCloudflaredVersion).mockReturnValue(null);
+
+    const { doctor } = await import("../../src/commands/doctor.js");
+    await doctor();
+
+    expect(all()).toContain("[WARN] cloudflared version");
   });
 
   it("fails when fallback origin is misconfigured", async () => {

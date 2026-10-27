@@ -352,6 +352,8 @@ describe("compose: writeInfraCompose", () => {
     expect(parsed.services.traefik.container_name).toBe("devtun-traefik");
     expect(parsed.services.tunnel.container_name).toBe("devtun-tunnel");
     expect(parsed.services.traefik.ports).toBeUndefined();
+    expect(parsed.services.traefik.mem_limit).toBe("256m");
+    expect(parsed.services.tunnel.mem_limit).toBe("256m");
     expect(parsed.services.traefik.command).toContain(
       "--providers.docker.network=devtun"
     );

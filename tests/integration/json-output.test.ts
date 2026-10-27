@@ -7,6 +7,7 @@ import { captureStdout, type StdoutCapture } from "../helpers/capture-stdout.js"
 vi.mock("../../src/lib/docker.js", () => ({
   isDockerRunning: vi.fn().mockReturnValue(true),
   isStackRunning: vi.fn().mockReturnValue(true),
+  tunnelCloudflaredVersion: vi.fn().mockReturnValue("2026.10.4"),
   restartProject: vi.fn(),
   composeUp: vi.fn(),
   composeDown: vi.fn(),
@@ -218,9 +219,10 @@ describe("--json output", () => {
         summary: { ok: number; warn: number; fail: number; skip: number };
         checks: Array<{ name: string; status: string; detail: string }>;
       }>();
-      expect(result.summary).toEqual({ ok: 10, warn: 0, fail: 0, skip: 0 });
-      expect(result.checks).toHaveLength(10);
+      expect(result.summary).toEqual({ ok: 11, warn: 0, fail: 0, skip: 0 });
+      expect(result.checks).toHaveLength(11);
       const names = result.checks.map((c) => c.name);
+      expect(names).toContain("cloudflared version");
       expect(names).toContain("config file");
       expect(names).toContain("docker socket");
       expect(names).toContain("zone access");

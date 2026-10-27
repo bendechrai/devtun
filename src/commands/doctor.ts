@@ -4,7 +4,8 @@ import { configExists, loadConfig, dockerSocketOf } from "../lib/config.js";
 import { resolveInstance, type InstanceContext } from "../lib/instance.js";
 import { checkComposeSocketDrift } from "../lib/compose.js";
 import { resolveToken } from "../lib/token.js";
-import { isDockerRunning, isStackRunning } from "../lib/docker.js";
+import { isDockerRunning, isStackRunning, tunnelCloudflaredVersion } from "../lib/docker.js";
+import { MIN_CLOUDFLARED_VERSION, isCloudflaredOutdated } from "../lib/cloudflared.js";
 import { existsSync } from "fs";
 import { parseFlags } from "../lib/flags.js";
 import { handleHelp, type HelpDoc } from "../lib/help.js";
@@ -14,7 +15,7 @@ const doctorHelp: HelpDoc = {
   command: "doctor",
   synopsis: "devtun doctor [--instance <name>] [--json] [--help]",
   description:
-    "Run a read-only health check across config, Cloudflare API access, tunnel, SaaS state, fallback origin,\ncustom hostnames (with orphan detection), the instance's Docker socket, and the local Docker stack.\nFirst step for any troubleshooting.",
+    "Run a read-only health check across config, Cloudflare API access, tunnel, SaaS state, fallback origin,\ncustom hostnames (with orphan detection), the instance's Docker socket, the local Docker stack,\nand the running cloudflared version (fails on releases that trust revoked certificates).\nFirst step for any troubleshooting.",
   flags: [
     { name: "instance", aliases: ["i"], type: "string", description: "devtun instance to check. Defaults to DEVTUN_INSTANCE or 'devtun'." },
     {
@@ -320,10 +321,28 @@ async function checkDocker(
   }
   record("docker", "ok", "running");
 
-  if (isStackRunning({ cwd: inst.dir, dockerSocket: socket })) {
-    record("devtun stack", "ok", `running (use \`devtun down${iFlag}\` to stop)`);
-  } else {
+  if (!isStackRunning({ cwd: inst.dir, dockerSocket: socket })) {
     record("devtun stack", "warn", `not running. Start it with \`devtun up${iFlag}\`.`);
+    return;
+  }
+  record("devtun stack", "ok", `running (use \`devtun down${iFlag}\` to stop)`);
+
+  const version = tunnelCloudflaredVersion(`${inst.name}-tunnel`, socket);
+  if (!version) {
+    record(
+      "cloudflared version",
+      "warn",
+      `could not read it from ${inst.name}-tunnel. Check \`docker compose logs tunnel\` in ${inst.dir}.`
+    );
+  } else if (isCloudflaredOutdated(version)) {
+    record(
+      "cloudflared version",
+      "fail",
+      `${version} trusts revoked certificates (need >= ${MIN_CLOUDFLARED_VERSION}). ` +
+      `Run \`devtun up${iFlag}\` to pull and restart.`
+    );
+  } else {
+    record("cloudflared version", "ok", version);
   }
 }
 

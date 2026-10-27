@@ -56,6 +56,7 @@ ${portsBlock}    volumes:
     networks:
       - ${net}
     restart: unless-stopped
+    mem_limit: 256m
 
   tunnel:
     image: cloudflare/cloudflared:latest
@@ -66,6 +67,7 @@ ${portsBlock}    volumes:
     networks:
       - ${net}
     restart: unless-stopped
+    mem_limit: 256m
     depends_on:
       - traefik
 

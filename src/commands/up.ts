@@ -10,7 +10,7 @@ const upHelp: HelpDoc = {
   command: "up",
   synopsis: "devtun up [--instance <name>] [--help]",
   description:
-    "Start the devtun infrastructure containers (Traefik + cloudflared) using Docker Compose.\nRegenerates the instance's docker-compose.yml and .env from config every run.\nRefuses to regenerate if the compose file's Docker socket mount disagrees with config\n(fix with `devtun config set dockerSocket <path>`).",
+    "Start the devtun infrastructure containers (Traefik + cloudflared) using Docker Compose.\nRegenerates the instance's docker-compose.yml and .env from config every run, and pulls the\nlatest Traefik and cloudflared images first (falls back to cached images if offline), so\nre-running `devtun up` is also how you apply upstream security updates.\nRefuses to regenerate if the compose file's Docker socket mount disagrees with config\n(fix with `devtun config set dockerSocket <path>`).",
   flags: [
     { name: "instance", aliases: ["i"], type: "string", description: "Target instance. Defaults to DEVTUN_INSTANCE or 'devtun'." },
     { name: "help", aliases: ["h"], description: "Show this help" },

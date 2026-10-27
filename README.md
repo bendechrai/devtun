@@ -137,7 +137,7 @@ devtun remove <name>     # Remove hostname, DNS record, and labels
 ### Infrastructure
 
 ```bash
-devtun up                # Start Traefik + tunnel containers
+devtun up                # Start Traefik + tunnel containers (pulls latest images first)
 devtun down              # Stop Traefik + tunnel containers
 devtun autostart enable  # Start on login (macOS/Linux)
 devtun doctor            # Health-check config, Cloudflare, Docker
@@ -302,6 +302,16 @@ devtun up
 ```
 
 Then http://localhost:8080 shows all discovered routes and their health.
+
+## Keeping Traefik and cloudflared up to date
+
+The generated stack uses floating image tags (`traefik:v3`, `cloudflare/cloudflared:latest`). Every `devtun up` pulls the latest versions of both before starting, so applying an upstream security update (for example Cloudflare's October 2026 advisory requiring cloudflared 2026.10.2+) is just:
+
+```bash
+devtun up                # per instance: devtun up -i <name>
+```
+
+`devtun doctor` reports the running cloudflared version and fails if it predates 2026.10.2. If the pull fails (offline), `devtun up` warns and starts with the cached images. Note that restarting a container does *not* update it -- only a pull does. Check what is running with `docker exec devtun-tunnel cloudflared --version`.
 
 ## Upgrading from single-instance versions
 
