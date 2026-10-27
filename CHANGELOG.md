@@ -1,3 +1,11 @@
+## [1.4.2](https://github.com/bendechrai/devtun/compare/v1.4.1...v1.4.2) (2026-10-27)
+
+
+### Bug Fixes
+
+* never route docker compose one-off containers ([77929b9](https://github.com/bendechrai/devtun/commit/77929b92275226653f67b3181f1779d41d1b82f4))
+* pull latest images on devtun up and check cloudflared version in doctor ([8e28c0c](https://github.com/bendechrai/devtun/commit/8e28c0cc4d7e79a164962ba2862b60a42d4c2bf5))
+
 ## [1.4.1](https://github.com/bendechrai/devtun/compare/v1.4.0...v1.4.1) (2026-09-16)
 
 
